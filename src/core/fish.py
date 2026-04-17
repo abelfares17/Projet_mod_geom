@@ -12,3 +12,4 @@ class Fish:
         # Attributs Partie 2 – Trafalgar
         self.is_leader: bool = False
         self.is_contaminated: bool = False
+        self.velocity_variation: np.ndarray = np.zeros(3)

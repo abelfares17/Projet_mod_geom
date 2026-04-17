@@ -30,8 +30,10 @@ class Simulation:
         self._physics_step(self.school, self.config)
         self.step_count += 1
 
-    def run(self, callback: Optional[Callable] = None) -> None:
+    def run(self, mode, callback: Optional[Callable] = None) -> None:
+        if mode == "partie2":
+            trafalgar._select_leader(self.school, self.config)
         for _ in range(self.config.n_steps):
-            self.step()
+            self.step(self.step_count)
             if callback:
                 callback(self)

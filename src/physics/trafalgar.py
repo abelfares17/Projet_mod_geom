@@ -24,6 +24,17 @@ def _select_leader(school: School) -> None:
     leader.is_contaminated = True
     leader.color = "red"
 
+def _bounce_boundary(fish: Fish, zone_limit: float) -> None:
+    for i in range(3):
+        if fish.position[i] < -zone_limit or fish.position[i] > zone_limit:
+            fish.velocity[i] *= -1
+            fish.position[i] = np.clip(fish.position[i], -zone_limit, zone_limit)
 
-def step(school: School, config: SimConfig) -> None:
-    raise NotImplementedError("Partie 2 (Trafalgar) pas encore implémentée.")
+
+def step(school: School, config: SimConfig, step_count: int) -> None:
+    #Propagation du comportement Trafalgar
+    if(step_count % config.propagation_interval == 0):
+      for fish in school.fish:
+        if fish.is_contaminated:
+          non_contaminated = [f for f in school.fish if not f.is_contaminated]
+          distances = np.array([np.linalg.norm(fish.position - f.position) for f in non_contaminated])

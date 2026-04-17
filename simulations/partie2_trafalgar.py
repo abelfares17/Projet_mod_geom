@@ -37,7 +37,7 @@ def main() -> None:
         if simulation.step_count % config.render_every == 0:
             renderer.update(simulation.school, simulation.step_count)
 
-    sim.run(callback=on_step)
+    sim.run( mode="partie2",callback=on_step)
     renderer.close()
 
 
