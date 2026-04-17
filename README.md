@@ -1,1 +1,108 @@
-# PROJET MODELISATION GEOMETRIQUE
+# Modélisation d'un Banc de Poissons — INP N7 2025-2026
+
+Projet de modélisation géométrique (2SN-B/M) implémentant un système de particules
+simulant le comportement collectif d'un banc de poissons en 3D.
+
+Le modèle est décomposé en cinq parties progressives :
+
+| Partie | Sujet | État |
+|--------|-------|------|
+| 1 | Mouvement aléatoire | ✅ |
+| 2 | Effet Trafalgar (propagation de comportement) | TODO |
+| 3 | Règles comportementales d'Aoki (répulsion / alignement / attraction) | TODO |
+| 4 | Influence de la densité (6 voisins topologiques via KDTree) | TODO |
+| 5 | Réseau d'influence visuel (cône de vision 60°) | TODO |
+
+---
+
+## Prérequis
+
+- Python 3.10 ou supérieur
+- `make` (macOS/Linux) **ou** invite de commandes Windows
+
+---
+
+## Installation
+
+Cloner le dépôt puis, depuis la racine du projet :
+
+**macOS / Linux**
+```bash
+make install
+```
+
+**Windows**
+```bat
+setup.bat
+```
+
+Ces commandes créent un virtualenv `.venv/` isolé et y installent toutes les
+dépendances listées dans `requirements.txt` (`numpy`, `matplotlib`, `scipy`).
+Le virtualenv n'est **pas** commité — chaque machine recrée le sien.
+
+---
+
+## Lancer une simulation
+
+**macOS / Linux**
+```bash
+make run-p1   # Partie 1 — Mouvement aléatoire
+make run-p2   # Partie 2 — Effet Trafalgar
+```
+
+**Windows** (après activation du venv)
+```bat
+.venv\Scripts\activate
+python simulations\partie1_mouvement_aleatoire.py
+```
+
+---
+
+## Nettoyage
+
+```bash
+make clean   # supprime .venv et les __pycache__
+```
+
+---
+
+## Structure du projet
+
+```
+src/
+├── config.py                  # Tous les paramètres en un seul endroit
+├── core/
+│   ├── fish.py                # Classe Fish (position, vitesse, couleur)
+│   ├── school.py              # Classe School (collection de poissons)
+│   └── simulation.py          # Moteur de simulation (dispatch physique)
+├── physics/
+│   ├── movement.py            # Partie 1 : mouvement aléatoire ✅
+│   ├── trafalgar.py           # Partie 2 : effet Trafalgar       TODO
+│   ├── aoki.py                # Partie 3 : règles d'Aoki         TODO
+│   ├── density.py             # Partie 4 : densité / KDTree      TODO
+│   └── visual_network.py      # Partie 5 : réseau visuel         TODO
+└── visualization/
+    └── renderer.py            # Rendu 3D Matplotlib (cross-platform)
+
+simulations/
+├── partie1_mouvement_aleatoire.py
+└── partie2_trafalgar.py
+```
+
+---
+
+## Ajouter une nouvelle partie
+
+1. Implémenter `step(school, config)` dans le module `src/physics/` correspondant.
+2. Créer le script d'entrée dans `simulations/`.
+3. Le dispatcher dans `src/core/simulation.py` reconnaît automatiquement le nouveau mode.
+
+---
+
+## Dépendances
+
+| Package | Usage |
+|---------|-------|
+| `numpy` | Calculs vectoriels (positions, vitesses, forces) |
+| `matplotlib` | Rendu 3D temps-réel (cross-platform, pas d'OpenGL requis) |
+| `scipy` | KDTree pour la recherche efficace de voisins (Partie 4+) |
