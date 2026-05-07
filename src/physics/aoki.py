@@ -1,4 +1,5 @@
-"""Partie 3 — Règles comportementales d'Aoki (1982).
+"""
+Partie 3 — Règles comportementales d'Aoki (1982).
 
 Trois zones concentriques autour de chaque poisson :
   - Répulsion  (d < R_repulsion)  : F = -k_rep * d̂
@@ -6,13 +7,11 @@ Trois zones concentriques autour de chaque poisson :
   - Attraction (R_align ≤ d < R_attr) : F = +k_attr * d̂
 
 La nouvelle vitesse est la somme des forces, normalisée à la magnitude V.
-
-TODO : implémenter cette partie.
 """
 
 from ..config import SimConfig
 from ..core.school import School
 
 
-def step(school: School, config: SimConfig) -> None:
+def step(school: School, config: SimConfig, step_count: int = 0) -> None:
     raise NotImplementedError("Partie 3 (Aoki) pas encore implémentée.")

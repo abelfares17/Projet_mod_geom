@@ -1,24 +1,17 @@
-# Modélisation d'un Banc de Poissons — INP N7 2025-2026
+# Modélisation d'un Banc de Poissons
 
-Projet de modélisation géométrique (2SN-B/M) implémentant un système de particules
+Projet de modélisation géométrique implémentant un système de particules
 simulant le comportement collectif d'un banc de poissons en 3D.
 
-Le modèle est décomposé en cinq parties progressives :
+Le modèle est décomposé en cinq parties :
 
 | Partie | Sujet | État |
 |--------|-------|------|
-| 1 | Mouvement aléatoire | ✅ |
+| 1 | Mouvement aléatoire | CHECK |
 | 2 | Effet Trafalgar (propagation de comportement) | TODO |
 | 3 | Règles comportementales d'Aoki (répulsion / alignement / attraction) | TODO |
 | 4 | Influence de la densité (6 voisins topologiques via KDTree) | TODO |
 | 5 | Réseau d'influence visuel (cône de vision 60°) | TODO |
-
----
-
-## Prérequis
-
-- Python 3.10 ou supérieur
-- `make` (macOS/Linux) **ou** invite de commandes Windows
 
 ---
 
@@ -31,15 +24,6 @@ Cloner le dépôt puis, depuis la racine du projet :
 make install
 ```
 
-**Windows**
-```bat
-setup.bat
-```
-
-Ces commandes créent un virtualenv `.venv/` isolé et y installent toutes les
-dépendances listées dans `requirements.txt` (`numpy`, `matplotlib`, `scipy`).
-Le virtualenv n'est **pas** commité — chaque machine recrée le sien.
-
 ---
 
 ## Lancer une simulation
@@ -48,12 +32,6 @@ Le virtualenv n'est **pas** commité — chaque machine recrée le sien.
 ```bash
 make run-p1   # Partie 1 — Mouvement aléatoire
 make run-p2   # Partie 2 — Effet Trafalgar
-```
-
-**Windows** (après activation du venv)
-```bat
-.venv\Scripts\activate
-python simulations\partie1_mouvement_aleatoire.py
 ```
 
 ---
@@ -76,7 +54,7 @@ src/
 │   ├── school.py              # Classe School (collection de poissons)
 │   └── simulation.py          # Moteur de simulation (dispatch physique)
 ├── physics/
-│   ├── movement.py            # Partie 1 : mouvement aléatoire ✅
+│   ├── movement.py            # Partie 1 : mouvement aléatoire   CHECK
 │   ├── trafalgar.py           # Partie 2 : effet Trafalgar       TODO
 │   ├── aoki.py                # Partie 3 : règles d'Aoki         TODO
 │   ├── density.py             # Partie 4 : densité / KDTree      TODO

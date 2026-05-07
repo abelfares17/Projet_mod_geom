@@ -1,14 +1,15 @@
-"""Rendu 3D temps-réel avec Matplotlib (cross-platform, pas de dépendance OpenGL)."""
+"""Rendu 3D temps-réel avec Matplotlib."""
 
 import matplotlib
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 — import requis pour projection='3d'
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
 from ..core.school import School
 
-
 class Renderer3D:
+    
+    "Initialisation du Renderer3D."
     def __init__(self, zone_limit: float, show_velocities: bool = True, title: str = "Banc de poissons"):
         self.zone_limit = zone_limit
         self.show_velocities = show_velocities
@@ -20,10 +21,13 @@ class Renderer3D:
 
         self._scatter = None
         self._quiver = None
+        self._open = True
 
         plt.ion()
         plt.show()
+        self.fig.canvas.mpl_connect("close_event", self._on_close)
 
+    "Mise en place des limites et étiquettes des axes."
     def _setup_axes(self) -> None:
         lim = self.zone_limit
         self.ax.set_xlim(-lim, lim)
@@ -33,7 +37,11 @@ class Renderer3D:
         self.ax.set_ylabel("Y")
         self.ax.set_zlabel("Z")
 
+    "Mise à jour de la visualisation."
     def update(self, school: School, step: int) -> None:
+        if not self._open:
+            return
+
         pos = school.positions   # (N, 3)
         vel = school.velocities  # (N, 3)
 
@@ -60,6 +68,16 @@ class Renderer3D:
         self.fig.canvas.draw_idle()
         plt.pause(0.001)
 
+    "Gestion de la fermeture de la fenêtre pour arrêter la simulation proprement."
+    def _on_close(self, event) -> None:
+        self._open = False
+
+    "Indique si la fenêtre de rendu est toujours ouverte."
+    def is_open(self) -> bool:
+        return self._open
+
+    "Ferme la fenêtre de rendu et libère les ressources associées."
     def close(self) -> None:
+        self._open = False
         plt.ioff()
-        plt.show()
+        plt.close(self.fig)

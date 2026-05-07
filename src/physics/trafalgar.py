@@ -1,40 +1,47 @@
-"""Partie 2 — Effet Trafalgar (propagation des mouvements).
+"""
+Partie 2 — Effet Trafalgar (propagation des comportements).
 
-Algorithme :
-  1. Sélection aléatoire d'un leader (une seule fois au démarrage).
-  2. Calcul des distances euclidiennes entre poissons.
-  3. Tous les `propagation_interval` pas : si un poisson est à moins de
-     `contamination_radius` d'un poisson contaminé, il adopte une variation
-     de vitesse similaire et devient contaminé (couleur verte).
-  4. Mise à jour des positions avec rebond aux frontières.
-
-TODO : implémenter cette partie.
+Logique :
+    1) Sélection aléatoire d'un leaderà l'initialisation.
+    2) Tous les 'propagation_interval' pas :
+    -> On récupère tous les poissons contaminés.
+    -> Chaque poisson non contaminé proche d'un contaminé devient contaminé.
+    -> Le poisson contaminé adopte une partie du comportement du contaminant (variation de vitesse).
+    3) Le reste des mouvements de base est similaire à la partie précédente, donc on les réutilise ici.
 """
 
 import numpy as np
 
 from ..config import SimConfig
+from src.core.fish import Fish
 from ..core.school import School
 from . import movement
 
-
-def _select_leader(school: School) -> None:
+"Sélection aléatoire d'un leader qui initie la contamination."
+def select_leader(school: School) -> None:
     leader = np.random.choice(school.fish)
     leader.is_leader = True
     leader.is_contaminated = True
     leader.color = "red"
 
-def _bounce_boundary(fish: Fish, zone_limit: float) -> None:
-    for i in range(3):
-        if fish.position[i] < -zone_limit or fish.position[i] > zone_limit:
-            fish.velocity[i] *= -1
-            fish.position[i] = np.clip(fish.position[i], -zone_limit, zone_limit)
+"Mise à jour de la position de chaque poisson selon sa vitesse, avec propagation du comportement contaminé."
+def step(school: School, config: SimConfig, step_count: int = 0) -> None:
+    
+    # Phase de contamination (à chaque intervalle définie)
+    if step_count % config.propagation_interval == 0:
+        for fish in school.fish:
+            if not fish.is_contaminated:
+                for other in school.fish:
 
+                    # Un poisson non contaminé devient contaminé s'il est proche d'un contaminé : il adopte son comportement
+                    if other.is_contaminated and np.linalg.norm(fish.position - other.position) < config.contamination_radius:
+                        fish.is_contaminated = True
+                        fish.color = "green"
+                        fish.velocity += (other.velocity - fish.velocity) * config.trafalgar_velocity_variation
+                        break
 
-def step(school: School, config: SimConfig, step_count: int) -> None:
-    #Propagation du comportement Trafalgar
-    if(step_count % config.propagation_interval == 0):
-      for fish in school.fish:
-        if fish.is_contaminated:
-          non_contaminated = [f for f in school.fish if not f.is_contaminated]
-          distances = np.array([np.linalg.norm(fish.position - f.position) for f in non_contaminated])
+    # Phase de mouvement
+    for fish in school.fish:
+        movement.perturb_velocity(fish, config.speed, config.velocity_noise)
+        fish.position += fish.velocity * config.dt
+        movement.bounce_boundary(fish, config.zone_limit)

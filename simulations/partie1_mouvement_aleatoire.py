@@ -1,4 +1,5 @@
-"""Partie 1 — Mouvement aléatoire en 3D.
+"""
+Partie 1 — Mouvement aléatoire en 3D.
 
 Lancer :
     python simulations/partie1_mouvement_aleatoire.py
@@ -13,7 +14,7 @@ from src.config import SimConfig
 from src.core.simulation import Simulation
 from src.visualization.renderer import Renderer3D
 
-
+"Simulation pour la partie 1, configurant les paramètres et lançant le moteur de simulation avec un rendu 3D."
 def main() -> None:
     config = SimConfig(
         n_fish=60,
@@ -30,13 +31,17 @@ def main() -> None:
     sim = Simulation(config, mode="partie1")
     renderer = Renderer3D(config.zone_limit, config.show_velocities, title="Partie 1 — Mouvement aléatoire")
 
-    def on_step(simulation: Simulation) -> None:
+    "Callback pour le rendu à chaque pas de simulation, avec une condition d'arrêt si la fenêtre est fermée."
+    def on_step(simulation: Simulation) -> bool:
+        if not renderer.is_open():
+            return False
         if simulation.step_count % config.render_every == 0:
             renderer.update(simulation.school, simulation.step_count)
+        return True
 
-    sim.run(callback=on_step)
+    sim.run(mode="partie1", callback=on_step)
     renderer.close()
 
-
+"Point d'entrée du script, lançant la fonction principale."
 if __name__ == "__main__":
     main()
