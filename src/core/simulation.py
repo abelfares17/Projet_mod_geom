@@ -2,12 +2,13 @@ from typing import Callable, Optional
 
 from ..config import SimConfig
 from .school import School
-from ..physics import movement, trafalgar, aoki, density, visual_network
+from ..physics import movement, trafalgar, trafalgar_2, aoki, density, visual_network
 
 "Dictionnaire des différents modes de simulation, associant chaque mode à sa fonction de mise à jour physique correspondante."
 _PHYSICS = {
     "partie1": movement.step,
     "partie2": trafalgar.step,
+    "partie2_bis": trafalgar_2.step,
     "partie3": aoki.step,
     "partie4": density.step,
     "partie5": visual_network.step,
@@ -45,6 +46,10 @@ class Simulation:
         # Initialisation spécifique à certaines parties
         if mode == "partie2":
             trafalgar.select_leader(self.school)
+
+        if mode == "partie2_bis":
+            trafalgar_2.initialize_school(self.school, self.config)
+            trafalgar_2.select_leader(self.school)
 
         # Boucle de simulation
         for _ in range(self.config.n_steps):

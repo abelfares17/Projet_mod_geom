@@ -2,7 +2,7 @@
 Partie 2 — Effet Trafalgar (propagation des comportements).
 
 Logique :
-    1) Sélection aléatoire d'un leaderà l'initialisation.
+    1) Sélection aléatoire d'un leader à l'initialisation.
     2) Tous les 'propagation_interval' pas :
     -> On récupère tous les poissons contaminés.
     -> Chaque poisson non contaminé proche d'un contaminé devient contaminé.
@@ -24,6 +24,7 @@ def select_leader(school: School) -> None:
     leader.is_contaminated = True
     leader.color = "red"
 
+
 "Mise à jour de la position de chaque poisson selon sa vitesse, avec propagation du comportement contaminé."
 def step(school: School, config: SimConfig, step_count: int = 0) -> None:
     
@@ -42,6 +43,7 @@ def step(school: School, config: SimConfig, step_count: int = 0) -> None:
 
     # Phase de mouvement
     for fish in school.fish:
-        movement.perturb_velocity(fish, config.speed, config.velocity_noise)
+        if step_count%config.random_movement_step == 0:
+          movement.perturb_velocity(fish, config.speed, config.velocity_noise)
         fish.position += fish.velocity * config.dt
         movement.bounce_boundary(fish, config.zone_limit)

@@ -32,6 +32,7 @@ make install
 ```bash
 make run-p1   # Partie 1 — Mouvement aléatoire
 make run-p2   # Partie 2 — Effet Trafalgar
+make run-p2-bis # Partie 2 bis - Effet Trafalgar plus visible
 ```
 
 ---

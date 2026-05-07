@@ -9,6 +9,7 @@ class SimConfig:
     n_steps: int = 1000
     zone_limit: float = 10.0
     seed: int = None
+    random_movement_step: int = 20
 
     "Partie 1 : Mouvement aléatoire"
     speed: float = 1.0

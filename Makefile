@@ -16,6 +16,10 @@ run-p1:
 run-p2:
 	$(PYTHON) simulations/partie2_trafalgar.py
 
+run-p2-bis:
+	$(PYTHON) simulations/partie2_bis.py
+
+
 clean:
 	rm -rf $(VENV)
 	find . -type d -name __pycache__ -exec rm -rf {} +

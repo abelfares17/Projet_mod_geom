@@ -21,7 +21,7 @@ def main() -> None:
         dt=0.05,
         n_steps=2000,
         zone_limit=10.0,
-        speed=1.0,
+        speed=0.5,
         velocity_noise=0.4,
         contamination_radius=2.5,
         propagation_interval=5,
