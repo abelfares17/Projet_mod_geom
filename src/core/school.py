@@ -21,6 +21,14 @@ class School:
             for _ in range(n_fish)
         ]
 
+    "Récupère les voisins d'un poisson donné dans un rayon spécifié."
+    def get_neighbors(self, fish: Fish, radius: float) -> list[Fish]:
+        neighbors = []
+        for other in self.fish:
+            if other is not fish and np.linalg.norm(fish.position - other.position) < radius:
+                neighbors.append(other)
+        return neighbors
+
     "Accesseurs vectorisés (utiles pour les calculs NumPy en physique)."
     @property
     def positions(self) -> np.ndarray:

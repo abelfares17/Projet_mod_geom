@@ -26,6 +26,7 @@ class SimConfig:
     r_attraction: float = 6.0
     k_repulsion: float = 0.5
     k_attraction: float = 0.3
+    k_alignement: float = 0.2
 
     "Partie 4 : Densité (6 voisins topologiques)"
     n_neighbors: int = 6

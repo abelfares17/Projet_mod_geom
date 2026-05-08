@@ -19,6 +19,9 @@ run-p2:
 run-p2-bis:
 	$(PYTHON) simulations/partie2_bis.py
 
+run-p3:
+	$(PYTHON) simulations/partie3_aoki.py
+
 
 clean:
 	rm -rf $(VENV)

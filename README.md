@@ -33,6 +33,7 @@ make install
 make run-p1   # Partie 1 — Mouvement aléatoire
 make run-p2   # Partie 2 — Effet Trafalgar
 make run-p2-bis # Partie 2 bis - Effet Trafalgar plus visible
+make run-p3   # Partie 3 - Règles comportementales d'Aoki
 ```
 
 ---
