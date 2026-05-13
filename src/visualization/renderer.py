@@ -3,6 +3,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 
 from ..core.school import School
@@ -19,7 +20,7 @@ class Renderer3D:
         self.ax = self.fig.add_subplot(111, projection="3d")
         self._setup_axes()
 
-        self._scatter = None
+        self._fish_collection = None
         self._quiver = None
         self._open = True
 
@@ -37,6 +38,62 @@ class Renderer3D:
         self.ax.set_ylabel("Y")
         self.ax.set_zlabel("Z")
 
+    _TRIS_PER_FISH = 10
+
+    def _make_fish_verts(
+        self,
+        positions: np.ndarray,
+        velocities: np.ndarray,
+        colors: list,
+        size: float,
+    ) -> tuple[list, list]:
+        verts: list = []
+        face_colors: list = []
+
+        for pos, vel, color in zip(positions, velocities, colors):
+            norm = np.linalg.norm(vel)
+            fwd = vel / norm if norm > 1e-10 else np.array([1., 0., 0.])
+
+            # Repère local orthonormé (fwd, right, up)
+            ref   = np.array([0., 0., 1.]) if abs(fwd[2]) < 0.9 else np.array([1., 0., 0.])
+            right = np.cross(fwd, ref);  right /= np.linalg.norm(right)
+            up    = np.cross(right, fwd)
+
+            s = size
+            # Points du corps
+            nose = pos + fwd   * s
+            top  = pos + up    * s * 0.28
+            bot  = pos - up    * s * 0.28
+            rgt  = pos + right * s * 0.32
+            lft  = pos - right * s * 0.32
+            tail = pos - fwd   * s * 0.7   # jonction corps-queue
+
+            # Points de la nageoire caudale (fourche)
+            cf_top = pos - fwd * s * 1.4 + up * s * 0.45
+            cf_mid = pos - fwd * s * 1.1           # creux du V
+            cf_bot = pos - fwd * s * 1.4 - up * s * 0.45
+
+            fish_tris = [
+                # Demi-avant (4 faces — nez = apex)
+                [nose, top, rgt],
+                [nose, rgt, bot],
+                [nose, bot, lft],
+                [nose, lft, top],
+                # Demi-arrière (4 faces — queue = apex)
+                [tail, top, rgt],
+                [tail, rgt, bot],
+                [tail, bot, lft],
+                [tail, lft, top],
+                # Nageoire caudale (2 faces)
+                [tail, cf_top, cf_mid],
+                [tail, cf_mid, cf_bot],
+            ]
+
+            verts.extend([[p.tolist() for p in tri] for tri in fish_tris])
+            face_colors.extend([color] * self._TRIS_PER_FISH)
+
+        return verts, face_colors
+
     "Mise à jour de la visualisation."
     def update(self, school: School, step: int) -> None:
         if not self._open:
@@ -45,16 +102,22 @@ class Renderer3D:
         pos = school.positions   # (N, 3)
         vel = school.velocities  # (N, 3)
 
-        if self._scatter is not None:
-            self._scatter.remove()
+        if self._fish_collection is not None:
+            self._fish_collection.remove()
         if self._quiver is not None:
             self._quiver.remove()
             self._quiver = None
 
-        self._scatter = self.ax.scatter(
-            pos[:, 0], pos[:, 1], pos[:, 2],
-            c=school.colors, s=15, alpha=0.85, depthshade=True,
+        size = self.zone_limit * 0.04
+        verts, face_colors = self._make_fish_verts(pos, vel, school.colors, size)
+        self._fish_collection = Poly3DCollection(
+            verts,
+            facecolors=face_colors,
+            edgecolors="k",
+            linewidths=0.2,
+            alpha=0.85,
         )
+        self.ax.add_collection3d(self._fish_collection)
 
         if self.show_velocities:
             scale = self.zone_limit * 0.08

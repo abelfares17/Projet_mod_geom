@@ -22,6 +22,9 @@ run-p2-bis:
 run-p3:
 	$(PYTHON) simulations/partie3_aoki.py
 
+run-p4:
+	$(PYTHON) simulations/partie4_densite.py
+
 
 clean:
 	rm -rf $(VENV)
