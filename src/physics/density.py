@@ -11,6 +11,7 @@ from ..core.school import School
 from scipy.spatial import cKDTree
 import numpy as np
 from . import movement
+from .aoki import compute_forces
 
 
 def step(school: School, config: SimConfig, step_count: int = 0) -> None:
@@ -23,40 +24,14 @@ def step(school: School, config: SimConfig, step_count: int = 0) -> None:
     for i, fish in enumerate(school.fish):
         # Remplissage du KDTree pour trouver les 6 voisins les plus proches
         distances, indices = tree.query(positions[i], k=min(7, len(school.fish)))
-        # Initilisation des forces
-        force = np.zeros(3)
-        repulsion = np.zeros(3)
-        alignement = np.zeros(3)
-        attraction = np.zeros(3)
-        alignement_count = 0
 
-        # On saute l'indice 0 (le poisson lui-même)
+        neighbors = []
+
         for d, j in zip(distances[1:], indices[1:]):
             other = school.fish[j]
-            d_vec = other.position - fish.position
+            neighbors.append(other)
 
-            if d < 1e-12:
-                continue
-            direction = d_vec / d
-
-            if d < config.r_repulsion:
-                repulsion -= direction
-            elif d < config.r_alignment:
-                alignement += other.velocity
-                alignement_count += 1
-            elif d < config.r_attraction:
-                attraction += direction
-        
-        # Force répulsion moyenne
-        force += config.k_repulsion * repulsion
-
-        # Force d'alignement moyenne
-        if alignement_count > 0:
-            avg_velocity = alignement / alignement_count
-            force += config.k_alignement * (avg_velocity - fish.velocity)
-
-        # Force d'attraction moyenne
-        force += config.k_attraction * attraction
+        force = compute_forces(fish, neighbors, config)
 
         # Nouvelle vélocité
         new_velocity = fish.velocity + force

@@ -25,6 +25,9 @@ run-p3:
 run-p4:
 	$(PYTHON) simulations/partie4_densite.py
 
+run-p5:
+	$(PYTHON) simulations/partie5_visual_network.py
+
 
 clean:
 	rm -rf $(VENV)

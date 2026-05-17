@@ -32,7 +32,7 @@ class SimConfig:
     n_neighbors: int = 6
 
     "Partie 5 : Réseau d'influence visuel"
-    vision_angle_deg: float = 60.0   # demi-angle du cône = 30°
+    vision_angle_deg: float = 60.0
 
     "Visualisation"
     render_every: int = 2            # dessiner 1 image sur N pas
