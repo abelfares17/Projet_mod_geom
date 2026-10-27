@@ -16,40 +16,45 @@ from .aoki import compute_forces
 
 def step(school: School, config: SimConfig, step_count: int = 0) -> None:
     # Créer le KDTree pour trouver les voisins les plus proches
-    positions = np.array([fish.position for fish in school.fish])
+    positions = school.positions
+    velocities = school.velocities
+    n_fish = len(positions)
+    k = min(7, n_fish)
+    if k <= 1:
+        return
+
     tree = cKDTree(positions)
+    _, indices = tree.query(positions, k=k)
+    nbr_idx = indices[:, 1:]  # (N, k-1), exclut le poisson lui-même
 
-    new_velocities = []
+    nbr_pos = positions[nbr_idx]
+    nbr_vel = velocities[nbr_idx]
+    d_vec = nbr_pos - positions[:, None, :]
+    d = np.linalg.norm(d_vec, axis=-1)
+    directions = np.divide(d_vec, d[..., None], out=np.zeros_like(d_vec), where=d[..., None] > 0)
 
-    for i, fish in enumerate(school.fish):
-        # Remplissage du KDTree pour trouver les 6 voisins les plus proches
-        distances, indices = tree.query(positions[i], k=min(7, len(school.fish)))
+    mask_rep = d < config.r_repulsion
+    mask_align = (d >= config.r_repulsion) & (d < config.r_alignment)
+    mask_attr = (d >= config.r_alignment) & (d < config.r_attraction)
 
-        neighbors = []
+    repulsion = -np.sum(np.where(mask_rep[..., None], directions, 0.0), axis=1)
+    attraction = np.sum(np.where(mask_attr[..., None], directions, 0.0), axis=1)
 
-        for d, j in zip(distances[1:], indices[1:]):
-            other = school.fish[j]
-            neighbors.append(other)
+    align_count = np.sum(mask_align, axis=1, keepdims=True)
+    align_sum = np.sum(np.where(mask_align[..., None], nbr_vel, 0.0), axis=1)
+    avg_vel = np.divide(align_sum, align_count, out=np.zeros_like(velocities), where=align_count > 0)
+    align_force = np.where(align_count > 0, config.k_alignement * (avg_vel - velocities), 0.0)
 
-        force = compute_forces(fish, neighbors, config)
+    forces = config.k_repulsion * repulsion + align_force + config.k_attraction * attraction
 
-        # Nouvelle vélocité
-        new_velocity = fish.velocity + force
-        norm_v = np.linalg.norm(new_velocity)
+    # Nouvelle vélocité normalisée à une magnitude fixée
+    new_velocities = velocities + forces
+    norms = np.linalg.norm(new_velocities, axis=-1, keepdims=True)
+    new_velocities = np.where(norms > 1e-12, config.speed * new_velocities / np.maximum(norms, 1e-12), velocities)
 
-        # Normalisation de la nouvelle vitesse à une magnitude fixée
-        if norm_v > 1e-12:
-            new_velocity = config.speed * new_velocity / norm_v
-
-        else:
-            new_velocity = fish.velocity.copy()
-        new_velocities.append(new_velocity)
-
-    # Mise à jour de la vélocité de chaque poisson
+    # Mise à jour de la vélocité et de la position de chaque poisson
     for fish, v in zip(school.fish, new_velocities):
         fish.velocity = v
-    # Mise à jour de la position de chaque poisson
-    for fish in school.fish:
         fish.position += fish.velocity * config.dt
         movement.bounce_boundary(fish, school.zone_limit)
 

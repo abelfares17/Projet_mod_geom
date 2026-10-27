@@ -21,13 +21,13 @@ def main() -> None:
         dt=0.05,
         n_steps=2000,
         zone_limit=10.0,
-        speed=0.5,
-        velocity_noise=0.4,
+        speed=1.0,
+        velocity_noise=0.08,
         contamination_radius=2.5,
         propagation_interval=5,
-        trafalgar_velocity_variation=0.7,
+        trafalgar_velocity_variation=0.9,
         render_every=2,
-        seed=42,
+        seed=3,
     )
 
     sim = Simulation(config, mode="partie2_bis")

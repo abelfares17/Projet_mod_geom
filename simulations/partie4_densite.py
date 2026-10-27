@@ -17,14 +17,18 @@ from src.visualization.renderer import Renderer3D
 "Simulation pour la partie 4, configurant les paramètres et lançant le moteur de simulation avec un rendu 3D."
 def main() -> None:
     config = SimConfig(
-        n_fish=60,
+        n_fish=120,
         dt=0.05,
-        n_steps=2000,
-        zone_limit=10.0,
-        speed=0.5,
+        n_steps=3500,
+        zone_limit=15.0,
+        speed=1.0,
         velocity_noise=0.4,
-        contamination_radius=2.5,
-        propagation_interval=5,
+        r_repulsion=0.9,
+        r_alignment=2.6,
+        r_attraction=5.2,
+        k_repulsion=0.95,
+        k_attraction=0.18,
+        k_alignement=0.38,
         render_every=2,
         seed=None,
     )

@@ -33,30 +33,45 @@ def is_visible(fish_i, fish_j, config) -> bool:
     return cos_angle >= cos_half_angle
 
 def step(school: School, config: SimConfig, step_count: int = 0) -> None:
-    new_velocities = []
-    for fish in school.fish:
-        neighbors = []
-        for other in school.fish:
-            if is_visible(fish, other, config):
-                neighbors.append(other)
-            
-        force = compute_forces(fish, neighbors, config)
-        # Nouvelle vélocité
-        new_velocity = fish.velocity + force
-        norm_v = np.linalg.norm(new_velocity)
+    pos = school.positions
+    vel = school.velocities
 
-        # Normalisation de la nouvelle vitesse à une magnitude fixée
-        if norm_v > 1e-12:
-            new_velocity = config.speed * new_velocity / norm_v
+    # Vecteurs et distances inter-poissons vectorisés (N, N, 3) et (N, N)
+    d_vec = pos[None, :, :] - pos[:, None, :]
+    d = np.linalg.norm(d_vec, axis=-1)
+    directions = np.divide(d_vec, d[..., None], out=np.zeros_like(d_vec), where=d[..., None] > 1e-12)
 
-        else:
-            new_velocity = fish.velocity.copy()
-        new_velocities.append(new_velocity)
+    # Cône de vision
+    speeds = np.linalg.norm(vel, axis=-1)
+    vel_dir = np.divide(vel, speeds[:, None], out=np.zeros_like(vel), where=speeds[:, None] > 1e-12)
+    cos_angle = np.einsum("ijk,ik->ij", directions, vel_dir)
+    cos_half_angle = np.cos(np.radians(config.vision_angle_deg / 2))
 
-    # Mise à jour de la vélocité de chaque poisson
+    visible = (d >= 1e-12) & ((speeds[:, None] < 1e-12) | (cos_angle >= cos_half_angle))
+    np.fill_diagonal(visible, False)
+
+    # Zones d'Aoki restreintes aux voisins visibles
+    mask_rep = visible & (d < config.r_repulsion)
+    mask_align = visible & (d >= config.r_repulsion) & (d < config.r_alignment)
+    mask_attr = visible & (d >= config.r_alignment) & (d < config.r_attraction)
+
+    repulsion = -np.sum(np.where(mask_rep[..., None], directions, 0.0), axis=1)
+    attraction = np.sum(np.where(mask_attr[..., None], directions, 0.0), axis=1)
+
+    align_count = np.sum(mask_align, axis=1, keepdims=True)
+    align_sum = mask_align.astype(float) @ vel
+    avg_vel = np.divide(align_sum, align_count, out=np.zeros_like(vel), where=align_count > 0)
+    align_force = np.where(align_count > 0, config.k_alignement * (avg_vel - vel), 0.0)
+
+    forces = config.k_repulsion * repulsion + align_force + config.k_attraction * attraction
+
+    # Nouvelle vélocité normalisée à une magnitude fixée
+    new_velocities = vel + forces
+    norms = np.linalg.norm(new_velocities, axis=-1, keepdims=True)
+    new_velocities = np.where(norms > 1e-12, config.speed * new_velocities / np.maximum(norms, 1e-12), vel)
+
+    # Mise à jour de la vélocité et de la position de chaque poisson
     for fish, v in zip(school.fish, new_velocities):
         fish.velocity = v
-    # Mise à jour de la position de chaque poisson
-    for fish in school.fish:
         fish.position += fish.velocity * config.dt
         movement.bounce_boundary(fish, school.zone_limit)

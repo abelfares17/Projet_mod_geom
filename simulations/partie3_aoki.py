@@ -17,17 +17,20 @@ from src.visualization.renderer import Renderer3D
 "Simulation pour la partie 3, configurant les paramètres et lançant le moteur de simulation avec un rendu 3D."
 def main() -> None:
     config = SimConfig(
-        n_fish=60,
-        dt=0.05,
-        n_steps=2000,
-        zone_limit=10.0,
-        speed=0.5,
-        velocity_noise=0.4,
-        contamination_radius=2.5,
-        propagation_interval=5,
-        render_every=2,
-        seed=None,
-    )
+    n_fish=70,
+    dt=0.04,
+    n_steps=3000,
+    zone_limit=12.0,
+    speed=1.0,
+    r_repulsion=0.2,
+    r_alignment=2.5,
+    r_attraction=5.0,
+    k_repulsion=0.9,
+    k_attraction=0.18,
+    k_alignement=0.35,
+    render_every=2,
+    seed=5,
+)
 
     sim = Simulation(config, mode="partie3")
     renderer = Renderer3D(config.zone_limit, config.show_velocities, title="Partie 3 — Règles d'Aoki")

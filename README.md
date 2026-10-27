@@ -35,7 +35,7 @@ make run-p2   # Partie 2 — Effet Trafalgar
 make run-p2-bis # Partie 2 bis - Effet Trafalgar plus visible
 make run-p3   # Partie 3 - Règles comportementales d'Aoki
 make run-p4   # Partie 4 - Influence de la densité sur les règles comportementales d'Aoki
-make run-p4   # Partie 5 - Réseau d'influence visuelle sur les règles comportementales d'Aoki
+make run-p5   # Partie 5 - Réseau d'influence visuelle sur les règles comportementales d'Aoki
 ```
 
 ---

@@ -22,9 +22,9 @@ def main() -> None:
         n_steps=2000,
         zone_limit=10.0,
         speed=0.5,
-        velocity_noise=0.4,
+        velocity_noise=0.1,
         contamination_radius=2.5,
-        propagation_interval=5,
+        propagation_interval=10,
         render_every=2,
         seed=42,
     )
